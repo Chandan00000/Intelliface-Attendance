@@ -10,6 +10,8 @@ class TrainingData():
         self.people=os.listdir(self.dir)
         features=[]
         labels=[]
+        if len(self.people)==0:
+            return 'No face data to train !'
         for person in self.people:
             path=os.path.join(self.dir,person)
             label=self.people.index(person)

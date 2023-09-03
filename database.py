@@ -1,3 +1,4 @@
+# To connect to your database change the database name below
 import pymongo
 from pymongo import errors
 import tkinter.messagebox as tkm
@@ -5,7 +6,8 @@ import pandas as pd
 class Database:
     def __init__(self,db_name,col_name) :
         try:
-            self.client=pymongo.MongoClient(host="mongodb://localhost:27017")
+            host="mongodb://localhost:27017"            #change the database name Here
+            self.client=pymongo.MongoClient(host=host)
         except:
             tkm.showerror("Database","Database Not Connected !")    
         self.db=self.client[db_name]

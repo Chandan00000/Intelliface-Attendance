@@ -3,12 +3,16 @@ from tkinter import ttk
 from PIL import Image, ImageTk
 from tkinter import messagebox
 from register import registration
+from database import Database
 
 class login:
     def __init__(self,root):
         self.root=root
         self.root.title("LOGIN PAGE")
         self.root.attributes('-fullscreen', True)
+        
+        # Database instance created 
+        self.admin=Database("admin","admin-data")
 
         self.new_win=None
 
@@ -38,17 +42,17 @@ class login:
         label_icon1.place(x=990,y=210,width=100,height=100)
 
 
-        username=Label(root,text="Username",font=("Times New Roman",15,"bold"),fg="white",bg="black")
+        username=Label(root,text="Username\E-mail",font=("Times New Roman",15,"bold"),fg="white",bg="black")
         username.place(x=930,y=390)
 
-        self.textname=ttk.Entry(root,font=("Times New Roman",15,"bold"))
-        self.textname.place(x=930,y=420,width=250,height=30)
+        self.username=ttk.Entry(root,font=("Times New Roman",15,"bold"))
+        self.username.place(x=930,y=420,width=250,height=30)
 
         password=Label(root,text="Password",font=("Times New Roman",15,"bold"),fg="white",bg="black")
         password.place(x=930,y=470)
 
-        self.textpass=ttk.Entry(root,show="*")
-        self.textpass.place(x=930,y=500,width=250,height=30)
+        self.password=ttk.Entry(root,font=("Times New Roman",15,"bold"),show="*")
+        self.password.place(x=930,y=500,width=250,height=30)
 
         login=Button(root,text="LOGIN",command=self.user_login,font=("Times New Roman",15,"bold"),fg="white",bg="red")
         login.place(x=1000,y=560,width=100)
@@ -64,74 +68,97 @@ class login:
         
 
     def user_login(self):
-        if self.textname.get()=="" or self.textpass.get()=="":
-            messagebox.showerror("Error","All fields required",parent=self.root)
-        elif self.textname.get()=="momo" and self.textpass.get()=="momo":
+        if self.username.get()=="" or self.password.get()=="":
+            messagebox.showwarning("Log In","All fields are required",parent=self.root)
+        elif self.admin.check_credentials(self.username.get(),self.password.get())==1:
             self.root.destroy()
-        else:
-            messagebox.showerror("Invalid Credentials","Please enter correct details",parent=self.root)
-    
+        elif self.admin.check_credentials(self.username.get(),self.password.get())==0:
+            messagebox.showwarning("Invalid Credentials","Please enter correct Password",parent=self.root)
+        elif self.admin.check_credentials(self.username.get(),self.password.get())==-1:
+            messagebox.showwarning("Invalid Credentials","Username not found !",parent=self.root)
+            
     #RESET PASSWORD
     def reset_password(self):
         if self.combo_securityq.get()=="Choose":
-            messagebox.showerror("Empty Fields","Select security question",parent=self.root1)
-        elif self.securitya_entry.get()=="":
-            messagebox.showerror("Empty Fields","Enter security answer",parent=self.root1)
-        elif self.new_pw_entry.get()=="":
-            messagebox.showerror("Empty Fields","Enter New Password",parent=self.root1)
-        elif self.new_pw_cnf_entry.get()=="":
-            messagebox.showerror("Empty Fields","Confirm Password",parent=self.root1)
-        elif self.new_pw_entry.get()!=self.new_pw_cnf_entry.get():
-            messagebox.showerror("Error","Passwords does not match. Try Again",parent=self.root1)
+            messagebox.showwarning("Empty Fields","Select security question",parent=self.root1)
+        elif self.securityAns.get()=="":
+            messagebox.showwarning("Empty Fields","Enter security answer",parent=self.root1)
+        elif self.admin.check_securityKey(self.username.get(),self.combo_securityq.get(),self.securityAns.get()):
+            messagebox.showwarning("Invalid Credentials","Wrong security question/answer !",parent=self.root1)
         else:
-            messagebox.showinfo("Success","Password succesfully reset")
-            self.root1.destroy()
+            if self.btn.cget('text')=='Next':
+                self.combo_securityq.place_forget()
+                self.securityAns.place_forget()
+                self.label_1.config(text="New Password")
+                self.label_2.config(text="Confirm Password")
+                self.entry_1.place(x=150,y=140,width=150)
+                self.entry_2.place(x=150,y=250,width=150)
+                self.btn.config(text='Submit')
+            else:
+                if self.entry_1.get()=="":
+                    messagebox.showwarning("Empty Fields","Enter New Password",parent=self.root1)
+                elif len(self.entry_1.get()) < 6:
+                    messagebox.showwarning("","Password must contain atleast 6 characters",parent=self.root1)
+                elif self.entry_2.get()=="":
+                    messagebox.showwarning("Empty Fields","Confirm Password",parent=self.root1)
+                elif self.entry_1.get()!=self.entry_2.get():
+                    messagebox.showwarning("","Passwords does not match. Try Again",parent=self.root1)
+                else:
+                    ack=self.admin.change_pass(self.username.get(),self.passVar.get())
+                    if ack==True:
+                        messagebox.showinfo("Success","Password succesfully reset",parent=self.root1)
+                        self.root1.destroy()
+                    else:
+                        messagebox.showwarning("database",ack,parent=self.root1)   
+                    
         
    
     #FOGOT PASSWORD TERMINAL
     def forgotpw(self):
-        if self.textname.get()=="":
-            messagebox.showerror("Error","Please enter username to reset password")
+        self.passVar=StringVar()
+        self.confirmVar=StringVar()
+        if self.username.get()=="":
+            messagebox.showwarning("","Please enter username to reset password",parent=self.root)
+        elif self.admin.check_credentials(self.username.get(),self.password.get())==-1:
+            messagebox.showwarning("Invalid Credentials","Username not found !",parent=self.root)
         else:
-            self.root1=Toplevel()
-            self.root1.title("Password Reset")
-            self.root1.geometry("450x550+550+170")
-            frame1=Frame(self.root1, bg="black")
-            frame1.place(x=0,y=0,width=450,height=550)
-            fpw=Label(self.root1,text="FORGOTTEN PASSWORD?",font=("times new roman",20,"bold"),fg="red",bg="black")
-            fpw.place(x=0,y=30,relwidth=1)
+            data=self.admin.check_credentials(self.username.get(),self.password.get())
+            if data==None:
+                messagebox.showwarning("","Enter security answer",parent=self.root1)
+                return
+            else:
+                self.root1=Toplevel()
+                self.root1.title("Password Reset")
+                self.root1.geometry("450x400+550+170")
+                self.root1.resizable(width=False,height=False)
+                frame1=Frame(self.root1, bg="black")
+                frame1.place(x=0,y=0,width=450,height=550)
+                fpw=Label(self.root1,text="FORGOTTEN PASSWORD?",font=("times new roman",20,"bold"),fg="red",bg="black")
+                fpw.place(x=0,y=30,relwidth=1)
 
-            securityq=Label(self.root1,text="Select Security Question",font=("times new roman",15),fg="white",bg="black")
-            securityq.place(x=30,y=100)
-            self.combo_securityq=ttk.Combobox(self.root1,font=("times new roman",10),state="readonly")
-            self.combo_securityq["values"]=("Choose","Your pet","1st school","Best friend","Nickname")
-            self.combo_securityq.place(x=30,y=130,width=150)
-            self.combo_securityq.current(0)
+                self.label_1=Label(self.root1,text="Select Security Question",font=("times new roman",15),fg="white",bg="black")
+                self.label_1.place(x=0,y=100,relwidth=1)
+                self.combo_securityq=ttk.Combobox(self.root1,font=("times new roman",13),state="readonly")
+                self.combo_securityq["values"]=("Choose","Your pet","1st school","Best friend","Nickname")
+                self.combo_securityq.current(0)  
+                self.combo_securityq.place(x=150,y=140,width=150)
+                self.entry_1=ttk.Entry(self.root1,font=("times new roman",13),textvariable=self.passVar,show='*')
+                self.entry_2=ttk.Entry(self.root1,font=("times new roman",13),textvariable=self.confirmVar,show='*')
 
-            securitya=Label(self.root1,text="Security Key",font=("times new roman",15),fg="white",bg="black")
-            securitya.place(x=30,y=180)
-            self.securitya_entry=ttk.Entry(self.root1,font=("calibri",10))
-            self.securitya_entry.place(x=30,y=210,width=150)
-
-            new_pw=Label(self.root1,text="New Password",font=("times new roman",15),fg="white",bg="black")
-            new_pw.place(x=30,y=260)
-            self.new_pw_entry=ttk.Entry(self.root1,font=("calibri",10))
-            self.new_pw_entry.place(x=30,y=290,width=150)
-
-            new_pw_cnf=Label(self.root1,text="Confirm New Password",font=("times new roman",15),fg="white",bg="black")
-            new_pw_cnf.place(x=30,y=340)
-            self.new_pw_cnf_entry=ttk.Entry(self.root1,show="*")
-            self.new_pw_cnf_entry.place(x=30,y=370,width=150)
-            
-            reset_btn=Button(self.root1,text="RESET PASSWORD",command=self.reset_password,font=("Times New Roman",15,"bold"),fg="white",bg="red",activebackground="red",activeforeground="white")
-            reset_btn.place(x=130,y=430)
+                self.label_2=Label(self.root1,text="Security Key",font=("times new roman",15),fg="white",bg="black")
+                self.label_2.place(x=0,y=210,relwidth=1)
+                self.securityAns=ttk.Entry(self.root1,font=("times new roman",13))
+                self.securityAns.place(x=150,y=250,width=150)
+                
+                self.btn=Button(self.root1,text="Next",command=self.reset_password,font=("Times New Roman",15,"bold"),fg="white",bg="red",activebackground="red",activeforeground="white",width=10)
+                self.btn.place(x=155,y=310)
 
 
 
     def reg(self):
         if not self.new_win:
             self.new_win=Toplevel(self.root)
-            self.reg=registration(self.new_win)
+            self.reg=registration(self.new_win,self.admin)
         else:
             self.reg.root.deiconify()
 

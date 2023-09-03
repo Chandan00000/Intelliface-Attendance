@@ -2,14 +2,13 @@ from tkinter import*
 from tkinter import ttk
 from PIL import Image,ImageTk
 from tkinter import messagebox
-
+from database import Database
 class registration:
-    def __init__(self,root):
+    def __init__(self,root,db):
         self.root=root
         self.root.title("New User Registration")
-        self.root.geometry("1500x800+0+10")
         self.root.attributes('-fullscreen', True)
-
+        self.admin=Database("admin","admin-data")
         #Variables
         self.v_fname=StringVar()
         self.v_lname=StringVar()
@@ -106,22 +105,28 @@ class registration:
         self.back_img=ImageTk.PhotoImage(image=img)
         back_button=Button(self.root,image=self.back_img,bd=0,highlightthickness=0,activebackground="black",command=self.backward).place(x=1440,y=35)
 
-    #Functions
     def register(self):
         if self.v_fname.get()=="" or self.v_lname.get()=="" or self.v_email.get()=="" or self.v_contact.get()=="" or self.v_pw.get()=="" or self.v_pwcnf.get()=="" or self.v_securitya.get()=="" or self.v_securityq.get()=="Choose":
-            messagebox.showerror("Missing fields","All fields are required !",parent=self.root)
+            messagebox.showwarning("Missing fields","All fields are required !",parent=self.root)
+        elif len(self.v_pw.get())<6:
+            messagebox.showwarning("","Password must contain atleast 6 characters",parent=self.root)
         elif self.v_pw.get()!=self.v_pwcnf.get():
-            messagebox.showerror("Error","Passwords does not match",parent=self.root)
+            messagebox.showwarning("","Passwords does not match",parent=self.root)
         elif self.v_check.get()==0:
-            messagebox.showerror("Error","Please agree to the T/Cs",parent=self.root)
+            messagebox.showwarning("","Please agree to the T/Cs",parent=self.root)
         else:
-            messagebox.showinfo("Success","New User successfully registered !",parent=self.root)
+            ack=self.admin.admin_insert_data(self.v_fname.get().capitalize(),self.v_lname.get().capitalize(),self.v_pw.get(),self.v_contact.get(),self.v_email.get(),self.v_securityq.get(),self.v_securitya.get())
+            if ack==True:
+                messagebox.showinfo("Database","Admin info Registered !",parent=self.root)
+            else:
+                messagebox.showwarning("Database",ack,parent=self.root)
 
     def backward(self):
         self.root.withdraw()
-        # self.root.destroy()
+        self.root.destroy()
 
 if __name__=="__main__":
     root=Tk()
-    ob=registration(root)
+    db=Database("admin","admin-data")
+    ob=registration(root,db)
     root.mainloop()

@@ -13,18 +13,19 @@ class Database:
         self.db=self.client[db_name]
         self.col=self.db[col_name]
         try:
-            self.csv_file=open(f".\\atd_files\\{col_name}.csv","r")
+            self.csv_file=open(f".\\atd_files\\attendance.csv","r")
         except OSError:
-            self.csv_file=open(f".\\atd_files\\{col_name}.csv","w")
+            self.csv_file=open(f".\\atd_files\\attendance.csv","w")
             
-        self.file_name=f".\\atd_files\\{col_name}.csv"
+        self.file_name=f".\\atd_files\\attendance.csv"
         csv_cols=["STUDENT-ID","DEPARTMENT","YEAR","SEMESTER","REG-NO","NAME"]
         try:
             self.df = pd.read_csv(self.csv_file)
         except :
             self.df = pd.DataFrame(columns=csv_cols)
         self.df.to_csv(self.file_name,index=False)
-        
+    
+        ####### Student databse operations ###############
     def insert_data(self,dept,year,sem,std_id,std_name,std_roll,std_grp,std_gender,std_dob,std_email,std_ph,std_address,photoSam):
         try:
             if dept=="Select Dept":
@@ -63,7 +64,7 @@ class Database:
             if sem=="Select Sem":
                 sem="None"
             data={"dept":dept,"year":year,"sem":sem,"std_name":std_name,"std_roll":std_roll,"std_grp":std_grp,"std_gender":std_gender,"std_dob":std_dob,"std_email":std_email,"std_ph":std_ph,"std_address":std_address,"photoSam":photoSam}
-            update=self.col.update_one({"_id":std_id},{"$set":data},upsert=True)
+            update=self.col.update_one({"_id":std_id},{"$set":data})
             self.df.loc[int(std_id[-1])-1,"STUDENT-ID"]=std_id
             self.df.loc[int(std_id[-1])-1,"DEPARTMENT"]=dept
             self.df.loc[int(std_id[-1])-1,"YEAR"]=year
@@ -83,6 +84,45 @@ class Database:
             return True
         except errors.DuplicateKeyError as ee: 
             return str(ee)
+        except Exception as e:
+            return str(e)
+        
+       ################# Admin databse Operations #################### 
+    def admin_insert_data(self,fst_name,lst_name,password,ph_num,email,security_key,security_ans):
+        try: 
+            data={"_id":email,"name":f"{fst_name} {lst_name}","password":password,"Phone":ph_num,security_key:security_ans}
+            insert=self.col.insert_one(data)
+            return True
+        except errors.DuplicateKeyError:
+            return "E-mail already exist !"
+        except ValueError as e:
+            return str(e)
+        
+    def check_credentials(self,userId,password):
+        data=self.col.find_one({"_id":userId},{"password":1})
+        if data==None:
+            return -1
+        else :
+            if list(data.values())[1]==password:
+                return 1
+            else :
+                return 0
+            
+    def check_securityKey(self,userId,qsn,ans):
+        data=self.col.find_one({"_id":userId})
+        if qsn in data.keys():
+            if data[qsn]==ans:
+                return False
+            else:
+                return True
+        else:
+            return True
+                
+          
+    def change_pass(self,userId,password):
+        try:
+            update=self.col.update_one({"_id":userId},{"$set":{"password":password}})
+            return True
         except Exception as e:
             return str(e)
     

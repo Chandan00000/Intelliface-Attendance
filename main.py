@@ -12,6 +12,12 @@ import csv
 class Atd_sys():
     
     def __init__(self,root):
+        
+        # LogIn page initiated
+        self.login_Win=Toplevel(root)
+        self.login=login(self.login_Win)
+        
+        # main window initiated
         self.root=root
         self.root.wm_iconbitmap(r'./resources/icon.ico')
         self.root.title("Attendance System")
@@ -20,9 +26,6 @@ class Atd_sys():
         height = self.root.winfo_screenheight()
         width = self.root.winfo_screenwidth()
         
-        # LogIn page added
-        self.login_Win=Toplevel(self.root)
-        self.login=login(self.login_Win)
         
         self.new_window1=None
         self.new_window2=None

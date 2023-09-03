@@ -8,7 +8,7 @@ from train_data import TrainingData
 from recognition import Recognition
 from attendance import Attendance
 import csv
-class Face_rec():
+class Atd_sys():
     def __init__(self,root):
         self.root=root
         self.root.wm_iconbitmap(r'./resources/icon.ico')
@@ -149,5 +149,5 @@ class Face_rec():
 
 if __name__=='__main__':
     root=Tk()
-    mainscreen=Face_rec(root)
+    mainscreen=Atd_sys(root)
     root.mainloop()

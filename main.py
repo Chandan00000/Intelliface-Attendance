@@ -3,12 +3,14 @@ from PIL import Image,ImageTk
 import tkinter.messagebox as tkm
 import os
 from threading import Thread
+from log_in import login
 from student import Student
 from train_data import TrainingData
 from recognition import Recognition
 from attendance import Attendance
 import csv
 class Atd_sys():
+    
     def __init__(self,root):
         self.root=root
         self.root.wm_iconbitmap(r'./resources/icon.ico')
@@ -17,6 +19,10 @@ class Atd_sys():
         self.training_data=TrainingData()
         height = self.root.winfo_screenheight()
         width = self.root.winfo_screenwidth()
+        
+        # LogIn page added
+        self.login_Win=Toplevel(self.root)
+        self.login=login(self.login_Win)
         
         self.new_window1=None
         self.new_window2=None

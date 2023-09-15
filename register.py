@@ -81,12 +81,12 @@ class registration:
 
         password=Label(frame,text="Password",font=("times new roman",15),fg="white",bg="black")
         password.place(x=30,y=165)
-        password_entry=ttk.Entry(frame,textvariable=self.v_pw,font="timesnewroman 13")
+        password_entry=ttk.Entry(frame,textvariable=self.v_pw,font="timesnewroman 13",show="*")
         password_entry.place(x=145,y=170,width=150)
 
         passwordcnf=Label(frame,text="Confirm Pass",font=("times new roman",15),fg="white",bg="black")
         passwordcnf.place(x=380,y=165)
-        passwordcnf_entry=ttk.Entry(frame,textvariable=self.v_pwcnf,font="timesnewroman 13")
+        passwordcnf_entry=ttk.Entry(frame,textvariable=self.v_pwcnf,font="timesnewroman 13",show="*")
         passwordcnf_entry.place(x=495,y=170,width=150)
 
         #agreement button
@@ -118,11 +118,12 @@ class registration:
             ack=self.admin.admin_insert_data(self.v_fname.get().capitalize(),self.v_lname.get().capitalize(),self.v_pw.get(),self.v_contact.get(),self.v_email.get(),self.v_securityq.get(),self.v_securitya.get())
             if ack==True:
                 messagebox.showinfo("Database","Admin info Registered !",parent=self.root)
+                self.root.destroy()
             else:
                 messagebox.showwarning("Database",ack,parent=self.root)
 
     def backward(self):
-        self.root.withdraw()
+        # self.root.withdraw()
         self.root.destroy()
 
 if __name__=="__main__":
